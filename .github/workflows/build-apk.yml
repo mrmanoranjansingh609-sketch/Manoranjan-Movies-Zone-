@@ -1,0 +1,135 @@
+name: Build and Release Debug APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Verify Java environment
+        run: |
+          java -version
+          echo "JAVA_HOME: $JAVA_HOME"
+          JAVA_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | awk -F '.' '{print $1}')
+          if [ -z "$JAVA_VER" ]; then
+            echo "Error: Unable to detect Java major version."
+            exit 1
+          fi
+          echo "Detected Java major version: $JAVA_VER"
+          if [ "$JAVA_VER" -lt 17 ]; then
+            echo "Error: Java version must be 17 or higher (detected: $JAVA_VER)."
+            exit 1
+          fi
+
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: Build debug APK
+        run: |
+          gradle :app:assembleDebug --stacktrace
+
+      - name: Locate and normalize APK
+        run: |
+          FOUND_APK=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -n 1)
+          if [ -z "$FOUND_APK" ] || [ ! -f "$FOUND_APK" ]; then
+            echo "Error: No debug APK found in app/build/outputs/apk/debug"
+            exit 1
+          fi
+          if [ ! -s "$FOUND_APK" ]; then
+            echo "Error: Generated APK is empty: $FOUND_APK"
+            exit 1
+          fi
+          echo "Found generated APK: $FOUND_APK"
+          TARGET_APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ "$FOUND_APK" != "$TARGET_APK" ]; then
+            cp "$FOUND_APK" "$TARGET_APK"
+          fi
+          if [ ! -s "$TARGET_APK" ]; then
+            echo "Error: Normalized APK missing or empty at $TARGET_APK"
+            exit 1
+          fi
+          echo "Normalized APK ready at: $TARGET_APK"
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Prepare APK release asset
+        id: prepare_asset
+        run: |
+          RELEASE_DIR="${RUNNER_TEMP}/apk-release"
+          mkdir -p "$RELEASE_DIR"
+          SOURCE_APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -s "$SOURCE_APK" ]; then
+            echo "Error: Source APK missing or empty: $SOURCE_APK"
+            exit 1
+          fi
+          DEST_APK="$RELEASE_DIR/app-debug.apk"
+          cp "$SOURCE_APK" "$DEST_APK"
+          if [ ! -s "$DEST_APK" ]; then
+            echo "Error: Failed to copy APK to $DEST_APK"
+            exit 1
+          fi
+          echo "asset_path=$DEST_APK" >> "$GITHUB_OUTPUT"
+          echo "Prepared release asset at: $DEST_APK"
+
+      - name: Publish APK to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh --version || { echo "Error: GitHub CLI (gh) is not available"; exit 1; }
+          ASSET_PATH="${{ steps.prepare_asset.outputs.asset_path }}"
+          if [ -z "$ASSET_PATH" ]; then
+            echo "Error: ASSET_PATH is not set"
+            exit 1
+          fi
+          if [ ! -f "$ASSET_PATH" ]; then
+            echo "Error: Prepared APK does not exist at $ASSET_PATH"
+            exit 1
+          fi
+          if [ ! -s "$ASSET_PATH" ]; then
+            echo "Error: Prepared APK is empty"
+            exit 1
+          fi
+          case "$ASSET_PATH" in
+            *.apk) ;;
+            *) echo "Error: Asset does not end with .apk"; exit 1 ;;
+          esac
+          FILENAME=$(basename "$ASSET_PATH")
+          if [ "$FILENAME" != "app-debug.apk" ]; then
+            echo "Error: Asset filename is not app-debug.apk (got: $FILENAME)"
+            exit 1
+          fi
+          TAG_NAME="v${{ github.run_number }}"
+          RELEASE_TITLE="Release v${{ github.run_number }}"
+          echo "Publishing $ASSET_PATH to GitHub Release $TAG_NAME..."
+          gh release create "$TAG_NAME" "$ASSET_PATH" --title "$RELEASE_TITLE" --notes "Automated Debug APK build from run ${{ github.run_number }}"
