@@ -120,8 +120,8 @@ fun ManoranjanDrawerContent(
                         color = Color.White
                     )
                     Text(
-                        text = "Movie Downloader & Hub",
-                        fontSize = 12.sp,
+                        text = "Movies Zone • mrmanoranjansingh609",
+                        fontSize = 11.sp,
                         color = NeonCyan,
                         fontWeight = FontWeight.Medium
                     )
@@ -226,8 +226,8 @@ fun ManoranjanDrawerContent(
 
             // Footer
             Text(
-                text = "© Manoranjan • All Rights Reserved",
-                fontSize = 11.sp,
+                text = "© Manoranjan Movies Zone • mrmanoranjansingh609",
+                fontSize = 10.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )

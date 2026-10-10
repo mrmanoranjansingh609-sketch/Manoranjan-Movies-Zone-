@@ -760,15 +760,15 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "© Manoranjan",
+                    text = "© Manoranjan Movies Zone",
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = Color.White.copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Movies • Help • Updates",
+                    text = "Developed by @mrmanoranjansingh609 • Movies, Help, Updates",
                     fontSize = 11.sp,
-                    color = Color.DarkGray
+                    color = NeonCyan
                 )
             }
         }

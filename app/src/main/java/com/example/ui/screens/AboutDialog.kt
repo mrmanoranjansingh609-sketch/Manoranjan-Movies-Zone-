@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.ManoranjanBorder
 import com.example.ui.theme.ManoranjanCardBg
+import com.example.ui.theme.ManoranjanSurface
 import com.example.ui.theme.ManoranjanSurfaceVariant
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.NeonPink
@@ -120,13 +121,19 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 )
 
                 Text(
-                    text = "Movie Downloader v1.0",
-                    fontSize = 13.sp,
+                    text = "Manoranjan Movies Zone",
+                    fontSize = 14.sp,
                     color = NeonCyan,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "by @mrmanoranjansingh609 • v1.0",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Box(
                     modifier = Modifier
@@ -146,7 +153,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Access Manoranjan Movies Zone, server mirrors, high-speed multi-threaded downloads, and exclusive Bollywood, Hollywood Dubbed & South Indian titles directly from your device.",
+                            text = "Official Manoranjan Movies Zone app created by mrmanoranjansingh609. Browse latest movies, server mirrors, high-speed downloads, and instant help portal.",
                             fontSize = 12.sp,
                             color = TextSecondary,
                             textAlign = TextAlign.Center
@@ -154,7 +161,36 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Developer Profile Info
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(ManoranjanSurface)
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Developer: Manoranjan Singh",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "ID: mrmanoranjansingh609",
+                        fontSize = 12.sp,
+                        color = NeonCyan
+                    )
+                    Text(
+                        text = "mrmanoranjansingh609@gmail.com",
+                        fontSize = 11.sp,
+                        color = TextMuted
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Creator & Instagram button
                 Row(
@@ -187,7 +223,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 ElevatedButton(
                     onClick = onDismiss,
@@ -209,7 +245,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "© Manoranjan • All Rights Reserved",
+                    text = "© Manoranjan Movies Zone • mrmanoranjansingh609",
                     fontSize = 11.sp,
                     color = TextMuted
                 )
